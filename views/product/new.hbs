@@ -1,0 +1,242 @@
+{{!-- <div class="card-body">
+    <form method="post" action="/cpanel/products/new" enctype="multipart/form-data">
+        <div class="form-group">
+            <label>Name</label>
+            <input name="name" type="text" class="form-control" placeholder="Name">
+        </div>
+        <div class="form-group">
+            <label>Price</label>
+            <input name="price" type="number" class="form-control" placeholder="Price">
+        </div>
+        <div class="form-group">
+            <label>Description</label>
+            <input name="description" type="text" class="form-control" placeholder="description">
+        </div>
+        <div class="form-group">
+            <div class="custom-file">
+                <input name="image" type="file" class="custom-file-input" multiple required>
+                <label class="custom-file-label">Choose file</label>
+            </div>
+        </div>
+        <div>
+            <label>Brand</label>
+            <select name="brand" class="form-control">
+                {{#each brands}}
+                <option value="{{this._id}}">{{this.name}}</option>
+                {{/each}}
+            </select>
+        </div>
+        <div>
+            <label>Category</label>
+            <select name="category" class="form-control">
+                {{#each categories}}
+                <option value="{{this._id}}">{{this.name}}</option>
+                {{/each}}
+            </select>
+        </div>
+        <div id="sizeContainer">
+            <label>Kích cỡ và Số lượng:</label><br>
+            <!-- Kích cỡ và số lượng sẽ được thêm vào đây -->
+        </div>
+        <button type="button" onclick="addSizeField()">Thêm Kích cỡ và Số lượng</button><br>
+        <button type="submit" class="btn btn-primary">Submit</button>
+
+
+    </form>
+</div>
+
+
+<script>
+    function addSizeField() {
+        const sizeContainer = document.getElementById('sizeContainer');
+        const div = document.createElement('div');
+        div.className = 'sizeField';
+
+        const sizeInput = document.createElement('input');
+        sizeInput.type = 'text';
+        sizeInput.name = 'sizes.size';
+        sizeInput.placeholder = 'Size';
+
+        const quantityInput = document.createElement('input');
+        quantityInput.type = 'number';
+        quantityInput.name = 'sizes.quantity';
+        quantityInput.placeholder = 'Quantity';
+        quantityInput.min = 0;
+
+        const removeButton = document.createElement('button');
+        removeButton.type = 'button';
+        removeButton.textContent = 'Remove';
+        removeButton.onclick = () => sizeContainer.removeChild(div);
+
+        div.appendChild(sizeInput);
+        div.appendChild(quantityInput);
+        div.appendChild(removeButton);
+        sizeContainer.appendChild(div);
+    }
+</script> --}}
+
+<style>
+    .sizeField {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .sizeField input {
+        margin-right: 10px;
+    }
+
+    .sizeField button {
+        margin-left: 10px;
+    }
+
+    .custom-file-label::after {
+        content: "Browse";
+    }
+
+    .form-section {
+        margin-bottom: 20px;
+    }
+</style>
+
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">New Product</h5>
+            <form method="post" action="/cpanel/products/new" enctype="multipart/form-data">
+                <div class="form-group form-section">
+                    <label for="name">Name</label>
+                    <input id="name" name="name" type="text" class="form-control" placeholder="Name">
+                </div>
+                <div class="form-group form-section">
+                    <label for="price">Price</label>
+                    <input id="price" name="price" type="number" class="form-control" placeholder="Price">
+                </div>
+                <div class="form-group form-section">
+                    <label for="description">Description</label>
+                    <input id="description" name="description" type="text" class="form-control"
+                        placeholder="Description">
+                </div>
+                <div class="form-group form-section">
+                    <label for="image">Image</label>
+                    <div class="custom-file">
+                        <input id="file" onchange="displayImgs()" name="image" type="file" class="custom-file-input"
+                            multiple required>
+                        <label class="custom-file-label" for="image">Choose file</label>
+                        {{!--    --}}
+                        <div id="imgContainer">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group form-section">
+                    <label for="brand">Brand</label>
+                    <select id="brand" name="brand" class="form-control">
+                        {{#each brands}}
+                        <option value="{{this._id}}">{{this.name}}</option>
+                        {{/each}}
+                    </select>
+                </div>
+                <div class="form-group form-section">
+                    <label for="category">Category</label>
+                    <select id="category" name="category" class="form-control">
+                        {{#each categories}}
+                        <option value="{{this._id}}">{{this.name}}</option>
+                        {{/each}}
+                    </select>
+                </div>
+                <div class="form-group form-section" id="sizeContainer">
+                    <label>Kích cỡ và Số lượng:</label><br>
+                    <!-- Kích cỡ và số lượng sẽ được thêm vào đây -->
+                </div>
+                <button type="button" class="btn btn-secondary mb-3" onclick="addSizeField()">Thêm Kích cỡ và Số
+                    lượng</button><br>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS and dependencies -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+    function addSizeField() {
+        const sizeContainer = document.getElementById('sizeContainer');
+        const div = document.createElement('div');
+        div.className = 'sizeField';
+
+        const sizeInput = document.createElement('input');
+        sizeInput.type = 'text';
+        sizeInput.name = 'sizes.size';
+        sizeInput.placeholder = 'Size';
+        sizeInput.className = 'form-control';
+
+        const quantityInput = document.createElement('input');
+        quantityInput.type = 'number';
+        quantityInput.name = 'sizes.quantity';
+        quantityInput.placeholder = 'Quantity';
+        quantityInput.min = 0;
+        quantityInput.className = 'form-control';
+
+        const removeButton = document.createElement('button');
+        removeButton.type = 'button';
+        removeButton.textContent = 'Remove';
+        removeButton.className = 'btn btn-danger';
+        removeButton.onclick = () => sizeContainer.removeChild(div);
+
+        div.appendChild(sizeInput);
+        div.appendChild(quantityInput);
+        div.appendChild(removeButton);
+        sizeContainer.appendChild(div);
+    }
+</script>
+
+{{!--
+<script>
+    // hiển thị hình ảnh khi chọn
+    const displayImg = () => {
+        var file = document.getElementById('file').files[0];
+        var reader = new FileReader();
+        // it's onload event and you forgot (parameters)
+        reader.onload = function (e) {
+            var image = document.getElementById("img");
+            // the result image data
+            image.src = e.target.result;
+        }
+        // you have to declare the file loading
+        reader.readAsDataURL(file);
+    }
+</script> --}}
+
+<script>
+    const displayImgs = () => {
+        const fileInput = document.getElementById('file');
+        const imgContainer = document.getElementById("imgContainer"); // Create a container for all images
+
+        // Clear any existing images before displaying new ones
+        imgContainer.innerHTML = "";
+
+        if (fileInput.files && fileInput.files.length > 0) {
+            for (let i = 0; i < fileInput.files.length; i++) {
+                const file = fileInput.files[i];
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    const img = document.createElement("img");
+                    img.src = e.target.result;
+                    img.width = 100; // Set width as desired
+                    img.height = 100; // Set height as desired
+                    imgContainer.appendChild(img);
+                };
+
+                reader.readAsDataURL(file);
+            }
+        } else {
+            // Handle case where no files are selected (optional)
+            console.log("No files selected");
+        }
+    };
+</script>
