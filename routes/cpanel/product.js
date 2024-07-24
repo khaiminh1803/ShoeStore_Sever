@@ -109,17 +109,68 @@ router.get('/:id/edit', async (req, res, next) => {
 
 // http://localhost:3000/cpanel/products/:id/edit
 // xử lý trang cập nhật sản phẩm
+// router.post('/:id/edit', uploadFile.array('image', 10), async (req, res, next) => {
+//     try {
+//         // ipconfig
+//         let { id } = req.params
+//         let { name, price, description, brand, category } = req.body;
+//         console.log(req.files);
+
+//         // let images = [];
+//         let images = req.body.existingImages || []; // This should hold the remaining existing images
+//         if (req.files && req.files.length > 0) {
+//             images = req.files.map(file => `${CONFIG.CONSTANTS.IP}images/${file.filename}`);
+//         }
+
+//         let sizes = [];
+//         if (req.body['sizes.size'] && req.body['sizes.quantity']) {
+//             if (Array.isArray(req.body['sizes.size']) && Array.isArray(req.body['sizes.quantity'])) {
+//                 sizes = req.body['sizes.size'].map((size, index) => ({
+//                     size: size,
+//                     quantity: req.body['sizes.quantity'][index]
+//                 }));
+//             } else {
+//                 sizes.push({
+//                     size: req.body['sizes.size'],
+//                     quantity: req.body['sizes.quantity']
+//                 });
+//             }
+//         }
+//         await productController.updateProduct(id,name, price, description, images, sizes, brand, category);
+//         return res.redirect('/cpanel/products');
+//     } catch (error) {
+//         console.log('Update product error', error);
+//         next(error);
+//     }
+// })
 router.post('/:id/edit', uploadFile.array('image', 10), async (req, res, next) => {
     try {
-        // ipconfig
-        let { id } = req.params
         let { name, price, description, brand, category } = req.body;
-        console.log(req.files);
+        let { id } = req.params
 
-        // let images = [];
-        let images = req.body.existingImages || []; // This should hold the remaining existing images
+        // Existing images from the form
+        // let images = req.body.existingImages || [];
+        const products = await productController.getProductById(id);
+        let images = products.image;
+
+
+        if (!Array.isArray(images)) {
+            images = [images];
+        }
+
+        // Handle removed images
+        if (req.body.removeImages) {
+            let removeImages = req.body.removeImages;
+            if (!Array.isArray(removeImages)) {
+                removeImages = [removeImages];
+            }
+            images = images.filter(image => !removeImages.includes(image));
+        }
+
+        // Handle new uploaded images
         if (req.files && req.files.length > 0) {
-            images = req.files.map(file => `${CONFIG.CONSTANTS.IP}images/${file.filename}`);
+            const newImages = req.files.map(file => `${CONFIG.CONSTANTS.IP}images/${file.filename}`);
+            images = images.concat(newImages);
         }
 
         let sizes = [];
@@ -136,12 +187,14 @@ router.post('/:id/edit', uploadFile.array('image', 10), async (req, res, next) =
                 });
             }
         }
-        await productController.updateProduct(id,name, price, description, images, sizes, brand, category);
+
+        await productController.updateProduct(id, name, price, description, images, sizes, brand, category);
         return res.redirect('/cpanel/products');
     } catch (error) {
-        console.log('Update product error', error);
+        console.log('Edit product error', error);
         next(error);
     }
-})
+});
+
 
 module.exports = router;

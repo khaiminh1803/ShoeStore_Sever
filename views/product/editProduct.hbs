@@ -391,23 +391,25 @@
 
                                     <div class="form-group form-section">
                                         <label for="image">Image</label>
-                                        <button>Add image</button>
-                                        <div class="custom-file">
-                                            <input id="file" onchange="displayImgs()" name="image" type="file"
-                                                class="custom-file-input" multiple>
-                                            {{!-- <label class="custom-file-label" for="image"></label> --}}
-
-                                            <div id="imgContainer" class="mt-2">
-                                                {{#each product.image}}
+                                        <div class="custom-file" id="imageContainer">
+                                            <!-- Existing images -->
+                                            {{#each product.image}}
+                                            <div class="imageField">
                                                 <img src="{{this}}" width="100" height="100" />
-                                                {{!-- /**/ --}}
-                                                
-                                                {{/each}}
+                                                {{!-- <input type="hidden" name="existingImages" value="{{this}}"> --}}
+                                                <input type="hidden" name="existingImages" value="{{this}}">
+
+                                                <button type="button" class="btn btn-danger"
+                                                    onclick="removeImage(this)">Remove</button>
                                             </div>
-                                        
+                                            {{/each}}
+
+                                            <!-- New images to be added here -->
                                         </div>
-                                         
+                                        <button type="button" class="btn btn-secondary mb-3"
+                                            onclick="addImageField()">Thêm Ảnh</button><br>
                                     </div>
+
                                     <div class="form-group " style="margin-top: auto;">
                                         <label for="brand">Brand</label>
                                         <select id="brand" name="brand" class="form-control">
@@ -443,6 +445,7 @@
                                                 placeholder="Size" class="form-control">
                                             <button type="button" class="btn btn-info"
                                                 onclick="removeSizeField(this)">Remove</button>
+
                                         </div>
                                         {{/each}}
                                     </div>
@@ -477,7 +480,67 @@
 
 
 
+<script>
+    function addImageField() {
+        const imageContainer = document.getElementById('imageContainer');
+        const div = document.createElement('div');
+        div.className = 'imageField';
 
+        const imageInput = document.createElement('input');
+        imageInput.type = 'file';
+        imageInput.name = 'image'; // Ensure this matches the field name in Multer configuration
+        imageInput.className = 'form-control';
+        imageInput.multiple = true; // Allow multiple files to be selected
+        imageInput.onchange = displayImgs;
+
+        const removeButton = document.createElement('button');
+        removeButton.type = 'button';
+        removeButton.textContent = 'Remove';
+        removeButton.className = 'btn btn-danger';
+        removeButton.onclick = () => imageContainer.removeChild(div);
+
+        div.appendChild(imageInput);
+        div.appendChild(removeButton);
+        imageContainer.appendChild(div);
+    }
+
+    function displayImgs(event) {
+        const fileInput = event.target;
+        const imgContainer = document.createElement('div');
+        imgContainer.className = 'image-preview';
+
+        if (fileInput.files && fileInput.files.length > 0) {
+            for (let i = 0; i < fileInput.files.length; i++) {
+                const file = fileInput.files[i];
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    imgContainer.appendChild(img);
+                };
+
+                reader.readAsDataURL(file);
+            }
+        }
+
+        fileInput.parentNode.appendChild(imgContainer);
+    }
+
+    function removeImage(button) {
+        const imageField = button.parentNode;
+        const existingInput = imageField.querySelector('input[type="hidden"]');
+        if (existingInput) {
+            // Add a hidden input to indicate this image should be removed
+            const removeInput = document.createElement('input');
+            removeInput.type = 'hidden';
+            removeInput.name = 'removeImages';
+            removeInput.value = existingInput.value;
+            imageField.appendChild(removeInput);
+        }
+        imageField.style.display = 'none';
+    }
+</script>
 
 
 <style>
@@ -501,6 +564,40 @@
 
     .form-section {
         margin-bottom: 20px;
+    }
+
+    .imageField {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .imageField input {
+        margin-right: 10px;
+    }
+
+    .imageField button {
+        margin-left: 10px;
+    }
+
+    .custom-file-label::after {
+        content: "Browse";
+    }
+
+    .form-section {
+        margin-bottom: 20px;
+    }
+
+    .image-preview {
+        margin-top: 10px;
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .image-preview img {
+        margin: 5px;
+        width: 100px;
+        height: 100px;
     }
 </style>
 
@@ -540,35 +637,5 @@
         sizeContainer.removeChild(div);
     }
 
-   
-</script>
 
-<script>
-    const displayImgs = () => {
-        const fileInput = document.getElementById('file');
-        const imgContainer = document.getElementById("imgContainer"); // Create a container for all images
-
-        // Clear any existing images before displaying new ones
-        imgContainer.innerHTML = "";
-
-        if (fileInput.files && fileInput.files.length > 0) {
-            for (let i = 0; i < fileInput.files.length; i++) {
-                const file = fileInput.files[i];
-                const reader = new FileReader();
-
-                reader.onload = function (e) {
-                    const img = document.createElement("img");
-                    img.src = e.target.result;
-                    img.width = 100; // Set width as desired
-                    img.height = 100; // Set height as desired
-                    imgContainer.appendChild(img);
-                };
-
-                reader.readAsDataURL(file);
-            }
-        } else {
-            // Handle case where no files are selected (optional)
-            console.log("No files selected");
-        }
-    };
 </script>

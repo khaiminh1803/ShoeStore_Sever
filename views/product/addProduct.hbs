@@ -385,21 +385,17 @@
                                     </div>
                                     <div class="form-group">
                                         <label for="exampleTextarea1">Description</label>
-                                        <textarea name="description" class="form-control" id="exampleTextarea1"
-                                            rows="4" required></textarea>
+                                        <textarea name="description" class="form-control" id="exampleTextarea1" rows="4"
+                                            required></textarea>
                                     </div>
 
-                                    <div class="form-group form-section">
-                                        <label for="image">Image</label>
-                                        <div class="custom-file">
-                                            <input id="file" onchange="displayImgs()" name="image" type="file"
-                                                class="custom-file-input" multiple required>
-                                            <label class="custom-file-label" for="image"></label>
-                                            {{!-- --}}
-                                            <div id="imgContainer" class="mt-2"></div>
-                                            
-                                        </div>
+                                    <div class="form-group" id="imageContainer">
+                                        <label>Images:</label><br>
+                                        <!-- Input fields for images will be added here -->
                                     </div>
+                                    <button type="button" class="btn btn-secondary mb-3" onclick="addImageField()">Thêm
+                                        Ảnh</button><br>
+
                                     <div class="form-group " style="margin-top: auto;">
                                         <label for="brand">Brand</label>
                                         <select id="brand" name="brand" class="form-control">
@@ -471,6 +467,40 @@
     .form-section {
         margin-bottom: 20px;
     }
+
+    .imageField {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .imageField input {
+        margin-right: 10px;
+    }
+
+    .imageField button {
+        margin-left: 10px;
+    }
+
+    .custom-file-label::after {
+        content: "Browse";
+    }
+
+    .form-section {
+        margin-bottom: 20px;
+    }
+
+    .image-preview {
+        margin-top: 10px;
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .image-preview img {
+        margin: 5px;
+        width: 100px;
+        height: 100px;
+    }
 </style>
 
 <script>
@@ -505,15 +535,35 @@
     }
 </script>
 
-
-
 <script>
-    const displayImgs = () => {
-        const fileInput = document.getElementById('file');
-        const imgContainer = document.getElementById("imgContainer"); // Create a container for all images
+    function addImageField() {
+        const imageContainer = document.getElementById('imageContainer');
+        const div = document.createElement('div');
+        div.className = 'imageField';
 
-        // Clear any existing images before displaying new ones
-        imgContainer.innerHTML = "";
+        const imageInput = document.createElement('input');
+        imageInput.type = 'file';
+        imageInput.name = 'image';
+        imageInput.multiple = true; // Allow multiple files to be selected
+        imageInput.className = 'form-control';
+        imageInput.style= 'width: 400px'
+        imageInput.onchange = displayImgs;
+
+        const removeButton = document.createElement('button');
+        removeButton.type = 'button';
+        removeButton.textContent = 'Remove';
+        removeButton.className = 'btn btn-danger';
+        removeButton.onclick = () => imageContainer.removeChild(div);
+
+        div.appendChild(imageInput);
+        div.appendChild(removeButton);
+        imageContainer.appendChild(div);
+    }
+
+    function displayImgs(event) {
+        const fileInput = event.target;
+        const imgContainer = document.createElement('div');
+        imgContainer.className = 'image-preview';
 
         if (fileInput.files && fileInput.files.length > 0) {
             for (let i = 0; i < fileInput.files.length; i++) {
@@ -521,19 +571,15 @@
                 const reader = new FileReader();
 
                 reader.onload = function (e) {
-                    const img = document.createElement("img");
+                    const img = document.createElement('img');
                     img.src = e.target.result;
-                    img.width = 100; // Set width as desired
-                    img.height = 100; // Set height as desired
                     imgContainer.appendChild(img);
                 };
 
                 reader.readAsDataURL(file);
             }
-        } else {
-            // Handle case where no files are selected (optional)
-            console.log("No files selected");
         }
-    };
-</script>
 
+        fileInput.parentNode.appendChild(imgContainer);
+    }
+</script>

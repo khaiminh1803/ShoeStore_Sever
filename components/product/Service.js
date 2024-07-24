@@ -1,5 +1,6 @@
 const productModel = require('./Model')
-
+const categoryModel = require('../category/Model')
+const brandModel = require('../brand/Model')
 // lấy danh sách sản phẩm từ database
 const getAllProducts = async () => {
     try {
@@ -25,9 +26,9 @@ const searchProduct = async (keyword) => {
     try {
         // select * from product where price  > 10 and price <100
         // and name like '%keyword  %'
-        let query = { 
+        let query = {
             // gt: greater than, lt: less than
-            name: {$regex: keyword, $options: 'i'},
+            name: { $regex: keyword, $options: 'i' },
         }
         let products = await productModel.find(query).populate('brand', 'name').populate('category', 'name')
         return products
@@ -42,24 +43,24 @@ const searchProduct = async (keyword) => {
 // thêm mới sản phẩm
 const addProduct = async (name, price, description, image, sizes, brand, category) => {
     try {
-      const newProduct = new productModel({
-        name,
-        price,
-        description,
-        image,
-        sizes,
-        brand,
-        category
-      });
-      await newProduct.save();
-      return true;
+        const newProduct = new productModel({
+            name,
+            price,
+            description,
+            image,
+            sizes,
+            brand,
+            category
+        });
+        await newProduct.save();
+        return true;
     } catch (error) {
-      console.log('Add new product failed', error);
-      return false;
+        console.log('Add new product failed', error);
+        return false;
     }
-  };
+};
 
-  // xóa sản phẩm theo id
+// xóa sản phẩm theo id
 const deleteProductById = async (id) => {
     try {
         // const index = data.findIndex(item => item._id.toString() == id.toString())
@@ -81,7 +82,7 @@ const deleteProductById = async (id) => {
 // update sản phẩm
 const updateProduct = async (id, name, price, description, image, sizes, brand, category) => {
     try {
-       
+
         const item = await productModel.findById(id)
         if (item) {
             item.name = name !== undefined ? name : item.name;
@@ -116,4 +117,38 @@ const updateProduct = async (id, name, price, description, image, sizes, brand, 
     return false
 }
 
-module.exports = {getAllProducts, getProductById, searchProduct, addProduct, deleteProductById, updateProduct }
+//lọc sản phẩm
+const filterProduct = async (categoryName, size, min, max) => {
+    try {
+        const category = await categoryModel.findOne({ name: { $regex: categoryName, $options: 'i' } });
+        let query = {
+            price: { $gt: min, $lt: max },
+            "sizes.size": { $in: size },
+            category: category._id
+        }
+        let products = await productModel.find(query).populate('category')
+        return products
+    } catch (error) {
+        console.log('Filter product error', error);
+    }
+    return null
+}
+
+const getProductsByBrand = async (brandName) => {
+    try {
+        const brand = await brandModel.findOne({ name: { $regex: brandName, $options: 'i' } });
+        if (!brand) {
+            return null; // Trả về null nếu không tìm thấy thương hiệu
+        }
+        let query = {
+            brand: brand._id
+        }
+        let products = await productModel.find(query).populate('brand').populate('category');
+        return products.length > 0 ? products : null; // Trả về null nếu không tìm thấy sản phẩm
+    } catch (error) {
+        console.log('Filter by brand error', error);
+        return null;
+    }
+}
+
+module.exports = { getAllProducts, getProductById, searchProduct, addProduct, deleteProductById, updateProduct, filterProduct, getProductsByBrand }

@@ -3,6 +3,9 @@ var router = express.Router();
 const productController = require('../../components/product/Controller')
 const cartController = require('../../components/cart/Controller')
 const orderController = require('../../components/order/Controller')
+const voucherContronller = require('../../components/voucher/Controller')
+const momoController = require('../../components/momo/momoController');
+const config = require('../../middle/config')
 // http://localhost:3000/api/products
 // http://localhost:3000/api/products/get-all
 router.get('/get-all', async function (req, res, next) {
@@ -40,6 +43,36 @@ router.get('/search', async function (req, res, next) {
         return res.status(200).json({ result: true, products })
     } catch (error) {
         return res.status(500).json({ result: false, products: null })
+    }
+});
+
+// http://localhost:3000/api/products/filter?category=Shoes&size=36&less=500&greater=100
+router.get('/filter', async function (req, res, next) {
+    try {
+        const { categoryName, size, min, max } = req.query;
+        const products = await productController.filterProduct(categoryName, size, Number(min), Number(max));
+        if (products) {
+            return res.status(200).json({ result: true, products });
+        } else {
+            return res.status(400).json({ result: false, products: null });
+        }
+    } catch (error) {
+        return res.status(500).json({ result: false, products: null });
+    }
+});
+
+// http://localhost:3000/api/products/filterByBrand?brandName=Adidas
+router.get('/filterByBrand', async function (req, res, next) {
+    try {
+        const { brandName } = req.query;
+        const products = await productController.getProductsByBrand(brandName);
+        if (products) {
+            return res.status(200).json({ result: true, products });
+        } else {
+            return res.status(400).json({ result: false, products: null });
+        }
+    } catch (error) {
+        return res.status(500).json({ result: false, products: null });
     }
 });
 
@@ -126,7 +159,7 @@ router.post('/cart/updateTotalPrice', async (req, res) => {
     try {
         const updatedCart = await cartController.updateTotalPrice(userId, totalPrice, selectedItems);
         return res.status(200).json({ result: true, updatedCart });
-    } catch (error) {   
+    } catch (error) {
         return res.status(500).json({ result: false, error: error.message });
     }
 });
@@ -138,8 +171,49 @@ router.post('/order', async (req, res) => {
         const order = await orderController.createOrder(userId, email, phonenumber, shippingAddress, selectedItems, paymentMethod, totalPrice);
         return res.status(200).json({ result: true, order });
     } catch (error) {
-        return res.status(500).json({ result: false,  error: error.message });
+        return res.status(500).json({ result: false, error: error.message });
     }
 });
+
+// http://localhost:3000/api/products/orderUser
+router.get('/orderUser', async function (req, res, next) {
+    try {
+        const {userId} = req.query
+        const orders = await orderController.getAllOrderById(userId)
+        return res.status(200).json({ result: true, orders })
+    } catch (error) {
+        return res.status(500).json({ result: false, orders: null })
+    }
+});
+
+// http://localhost:3000/api/products/orderUser/:id/detail
+router.get('/orderUser/:id/detail', async function (req, res, next) {
+    try {
+        const { id } = req.params
+        const orderDetail = await orderController.getOrderById(id);
+
+        if (orderDetail) {
+            return res.status(200).json({ result: true, orderDetail });
+        } else {
+            return res.status(404).json({ result: false, orderDetail: null });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ result: false, orderDetail: null });
+    }
+});
+
+// http://localhost:3000/api/products/getAllVoucher
+router.get('/getAllVoucher', async function (req, res, next) {
+    try {
+        const vouchers = await voucherContronller.getAllVoucher()
+        return res.status(200).json({ result: true, vouchers })
+    } catch (error) {
+        return res.status(500).json({ result: false, vouchers: null })
+    }
+});
+
+
+router.post('/momo/payment', momoController.createPayment);
 
 module.exports = router;

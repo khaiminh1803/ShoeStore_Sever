@@ -21,11 +21,31 @@ const createOrder = async (userId, email, phonenumber, shippingAddress, selected
             updatedAt: new Date(),
         });
         await cartModel.findOneAndDelete({ userId });
-        return order; 
+        return order.populate('items.product', 'price image name');; 
     } catch (error) {
         console.error('Lỗi khi tạo hóa đơn:', error.message);
         throw error; 
     }
 }
 
-module.exports = {createOrder}
+const getAllOrderById = async (userId) => {
+    try {
+        const orders = await orderModel.find({ userId: userId }).populate('items.product', 'price image name');
+        return orders
+    } catch (error) {
+        console.error('Get order user failed:', error.message);
+        throw error; 
+    }
+}
+
+const getOrderById = async (id) => {
+    try {
+        const order = await orderModel.findById(id).populate('items.product', 'price image name');
+        return order
+    } catch (error) {
+        console.error('Get order failed:', error.message);
+        throw error; 
+    }
+}
+
+module.exports = {createOrder,getAllOrderById, getOrderById}

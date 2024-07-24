@@ -52,4 +52,19 @@ const updateProduct = async (id, name, price, description, image, sizes, brand, 
     }
 }
 
-module.exports = {getAllProducts, getProductById, searchProduct, addProduct, deleteProductById, updateProduct}
+const filterProduct = async (categoryName,size, min, max) => {
+    try {
+        return await productService.filterProduct(categoryName,size, min, max)
+    } catch (error) {
+        console.log('Filter product error', error);
+    }
+}
+const getProductsByBrand = async (brandName) => {
+    try {
+        return await productService.getProductsByBrand(brandName)
+    } catch (error) {
+        console.log('Filter by brand error', error);
+    }
+}
+
+module.exports = {getAllProducts, getProductById, searchProduct, addProduct, deleteProductById, updateProduct, filterProduct, getProductsByBrand}

@@ -4,12 +4,15 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const mongoose = require('mongoose')
+const cors = require('cors');
+const session = require('express-session');
 require('./components/user/Model')
 require('./components/category/Model')
 require('./components/brand/Model')
 require('./components/product/Model')
 require('./components/cart/Model')
 require('./components/order/Model')
+require('./components/voucher/Model')
 var indexRouter = require('./routes/index');
 const userCpanelRouter = require('./routes/cpanel/user')
 const productCpanelRouter = require('./routes/cpanel/product')
@@ -17,6 +20,8 @@ const userAPIRouter = require('./routes/api/user')
 const productAPIRouter = require('./routes/api/product')
 
 var app = express();
+
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -28,6 +33,16 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// khai báo thông tin session, cookie
+app.use(session({
+  secret: 'iloveyou', // khóa
+  resave: true,
+  saveUninitialized: true,
+  cookie: { secure: false }
+}));
+
+// khai báo cors
+app.use(cors())
 
 // tạo kết nối tới database
 mongoose.connect('mongodb://127.0.0.1:27017/ShoeDB?readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false', {
