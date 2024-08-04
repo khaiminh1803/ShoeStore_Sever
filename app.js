@@ -18,6 +18,8 @@ const userCpanelRouter = require('./routes/cpanel/user')
 const productCpanelRouter = require('./routes/cpanel/product')
 const userAPIRouter = require('./routes/api/user')
 const productAPIRouter = require('./routes/api/product')
+// setup thong ke
+const hbs = require('hbs');
 
 var app = express();
 
@@ -26,6 +28,13 @@ var app = express();
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
+
+// Đăng ký helper 'json'
+// setup thong ke
+
+hbs.registerHelper('json', function(context) {
+  return JSON.stringify(context);
+});
 
 app.use(logger('dev'));
 app.use(express.json());

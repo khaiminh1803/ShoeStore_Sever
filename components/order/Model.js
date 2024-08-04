@@ -15,14 +15,14 @@ const orderDetailSchema = new Schema(
 const orderSchema = new Schema({
     userId: { type: ObjectId, ref: 'user' },
     email: { type: String, require: true},
-    phonenumber: {type: String, require: true},
+    phoneNumber: {type: String, require: true},
     shippingAddress: { type: String, require: true },
     items: [orderDetailSchema],
     totalPrice: { type: Number, default: 0 },
     paymentMethod: { type: String, require: true },
     status: { type: String, enum: ['pending', 'confirmed', 'shipped', 'delivered'], default: 'pending' },
-    createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date, default: Date.now },
+    voucherId: { type: ObjectId, ref: 'voucher', default: null }, 
+    orderDate: { type: Date, default: Date.now }, // Thời gian tạo đơn hàng
 });
 
 module.exports = mongoose.models.order || mongoose.model('order', orderSchema)

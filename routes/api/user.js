@@ -13,6 +13,10 @@ router.post('/login', async function (req, res, next) {
     const { email, password, name } = req.body
     const user = await userController.login(email, password, name)
     if (user) {
+      if (!user.isVerified) {
+        return res.status(400).json({ result: false, message: 'Account not verified' });
+      }
+
       // tạo token
       const token = jwt.sign({ user }, 'secret', { expiresIn: '1h' })
       const returnData = {
@@ -38,14 +42,32 @@ router.post('/register', [checkRegister], async function (req, res, next) {
   try {
     const { email, password, name } = req.body
     const user = await userController.register(email, password, name)
-    // xoa email đi là xong
+
     if (user) {
-      res.status(200).json({ result: true, user })
+      // Gửi code xác thực
+      await userController.sendVerificationCode(email);
+      res.status(200).json({ result: true, message: 'Registration successful. Please check your email for verification code.' })
     } else {
       res.status(400).json({ result: false, user: null })
     }
   } catch (error) {
     res.status(500).json({ result: false, user: null })
+  }
+});
+
+// http://localhost:3000/api/users/verify
+router.post('/verify', async (req, res) => {
+  try {
+    const { email, code } = req.body;
+    const isVerified = await userController.verifyCode(email, code);
+
+    if (isVerified) {
+      return res.status(200).json({ result: true, message: 'Account verified successfully' });
+    } else {
+      return res.status(400).json({ result: false, message: 'Invalid or expired verification code' });
+    }
+  } catch (error) {
+    return res.status(500).json({ result: false, message: 'Internal Server Error' });
   }
 });
 
@@ -69,7 +91,7 @@ router.post('/update-profile', async function (req, res, next) {
   try {
     const { id, name, email, address, phonenumber, avatar } = req.body
     const user = await userController.updateProfile(id, name, email, address, phonenumber, avatar)
-    if (user) { 
+    if (user) {
       res.status(200).json({ result: true, user })
     } else {
       res.status(400).json({ result: false, user: null })

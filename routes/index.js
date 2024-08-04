@@ -23,7 +23,7 @@ router.post('/login', async function (req, res, next) {
     if (result) {
       // khi login thành công
       // tạo token,lưu token vào session 
-      const token = jwt.sign({ role: result.role }, 'secret', { expiresIn: '1h' })
+      const token = jwt.sign({ id: result._id, role: result.role }, 'secret', { expiresIn: '1h' })
       console.log(token);
       req.session.token = token
       return res.redirect('/')

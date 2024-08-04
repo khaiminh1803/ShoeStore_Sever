@@ -7,7 +7,7 @@ const { authenUserPermission } = require('../../middle/Authen');
 // http://localhost:3000/cpanel/users
 
 // http://localhost:3000/cpanel/users
-router.get('/', async function (req, res, next) {
+router.get('/', [authenUserPermission], async function (req, res, next) {
     try {
         const users = await userController.getAllUsers();
         res.render('user/listUser', { users })
@@ -18,9 +18,16 @@ router.get('/', async function (req, res, next) {
 
 // xóa user theo id
 // http://localhost:3000/cpanel/users/:id/delete
-router.get('/:id/delete',[authenUserPermission], async function (req, res, next) {
+router.get('/:id/delete', [authenUserPermission], async function (req, res, next) {
     try {
         const { id } = req.params
+        const { user } = req;
+
+        if (user.id === id) {
+            // Người dùng đang cố gắng xóa chính họ
+            return res.json({ result: false, message: 'You cannot delete yourself' });
+        }
+
         const result = await userController.deleteUserById(id)
         return res.json({ result })
     } catch (error) {
@@ -30,7 +37,7 @@ router.get('/:id/delete',[authenUserPermission], async function (req, res, next)
 
 // http://localhost:3000/cpanel/users/new
 // hiển thị trang thêm mới user
-router.get('/new', async (req, res, next) => {
+router.get('/new', [authenUserPermission], async (req, res, next) => {
     try {
         res.render('user/addUser')
     } catch (error) {
@@ -40,7 +47,7 @@ router.get('/new', async (req, res, next) => {
 
 // http://localhost:3000/cpanel/users/new
 // xử lý trang thêm mới user
-router.post('/new', uploadFile.single('image'), async (req, res, next) => {
+router.post('/new', [authenUserPermission, uploadFile.single('image')], async (req, res, next) => {
     try {
         // ipconfig
         let { body, file } = req
@@ -48,9 +55,9 @@ router.post('/new', uploadFile.single('image'), async (req, res, next) => {
             let image = `${CONFIG.CONSTANTS.IP}images/${file.filename}`
             body = { ...body, avatar: image }
         }
-        let { name, email, password, address, phonenumber, avatar } = body
-        console.log('>>>> Add params: ', name, email, password, address, phonenumber, avatar);
-        await userController.register(email, password, name, address, phonenumber, avatar)
+        let { name, email, password, address, phonenumber, avatar, role } = body
+        console.log('>>>> Add params: ', name, email, password, address, phonenumber, avatar, role);
+        await userController.register(email, password, name, address, phonenumber, avatar, role)
         return res.redirect('/cpanel/users')
     } catch (error) {
         console.log('Add new product error', error);
@@ -60,11 +67,17 @@ router.post('/new', uploadFile.single('image'), async (req, res, next) => {
 
 // http://localhost:3000/cpanel/users/:id/edit
 // hiển thị trang cập nhật user
-router.get('/:id/edit', async (req, res, next) => {
+router.get('/:id/edit', [authenUserPermission], async (req, res, next) => {
     try {
         const { id } = req.params
         const user = await userController.getUserById(id)
-        res.render('user/editUser', { user})
+        const roles = [
+            { value: 0, name: 'Admin Level 1', selected: user.role === 0 },
+            { value: 1, name: 'Admin Level 2', selected: user.role === 1 },
+            { value: 2, name: 'Customer', selected: user.role === 2 }
+        ];
+
+        res.render('user/editUser', { user, roles });
     } catch (error) {
         next(error);
     }
@@ -72,7 +85,7 @@ router.get('/:id/edit', async (req, res, next) => {
 
 // http://localhost:3000/cpanel/users/:id/edit
 // xử lý trang cập nhật user
-router.post('/:id/edit', uploadFile.single('image'), async (req, res, next) => {
+router.post('/:id/edit', [authenUserPermission, uploadFile.single('image')], async (req, res, next) => {
     try {
         // ipconfig
         let { id } = req.params
@@ -81,9 +94,9 @@ router.post('/:id/edit', uploadFile.single('image'), async (req, res, next) => {
             let image = `${CONFIG.CONSTANTS.IP}images/${file.filename}`
             body = { ...body, avatar: image }
         }
-        let { name, email, password, address, phonenumber, avatar } = body
-        console.log('>>>> Edit params: ', name, email, password, address, phonenumber, avatar);
-        await userController.updateProfile(id, name, email, address, phonenumber, avatar)
+        let { name, email, password, address, phonenumber, avatar, role } = body
+        console.log('>>>> Edit params: ', name, email, password, address, phonenumber, avatar, role);
+        await userController.updateProfile(id, name, email, address, phonenumber, avatar, role)
         return res.redirect('/cpanel/users')
     } catch (error) {
         console.log('Update product error', error);

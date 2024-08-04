@@ -1,7 +1,37 @@
 const userModel = require('./Model')
 const bcrypt = require('bcryptjs')
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
 
-const register = async (email, password, name, address, phonenumber,avatar) => {
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'your-email@gmail.com',
+        pass: 'your-email-password'
+    }
+});
+
+const sendVerificationCode = async (email) => {
+    try {
+        // Tạo code ngẫu nhiên 6 chữ số
+        const verificationCode = crypto.randomInt(100000, 999999).toString();
+        // Cập nhật user với verification code
+        await userModel.updateOne({ email }, { verificationCode });
+        // Gửi email
+        const mailOptions = {
+            from: 'your-email@gmail.com',
+            to: email,
+            subject: 'Your verification code',
+            text: `Your verification code is ${verificationCode}.`
+        };
+        await transporter.sendMail(mailOptions);
+        console.log('Verification code sent');
+    } catch (error) {
+        console.log('Error sending verification code:', error);
+    }
+};
+
+const register = async (email, password, name, address, phonenumber, avatar, role) => {
     try {
         let user = await userModel.findOne({ email })
         if (!user) {
@@ -13,7 +43,8 @@ const register = async (email, password, name, address, phonenumber,avatar) => {
                 name,
                 address,
                 phonenumber,
-                avatar
+                avatar,
+                role
             })
             return true
         }
@@ -42,7 +73,7 @@ const login = async (email, password) => {
 }
 
 // update profile
-const updateProfile = async (id, name, email, address, phonenumber, avatar) => {
+const updateProfile = async (id, name, email, address, phonenumber, avatar, role) => {
     try {
         const user = await userModel.findById(id)
         if (user) {
@@ -51,6 +82,7 @@ const updateProfile = async (id, name, email, address, phonenumber, avatar) => {
             user.address = address ? address : user.address
             user.phonenumber = phonenumber ? phonenumber : user.phonenumber
             user.avatar = avatar ? avatar : user.avatar
+            user.role = role ? role : user.role
             await user.save()
             return user
         }
@@ -97,7 +129,7 @@ const updateUser = async (id, name, email, address, phonenumber, avatar) => {
     try {
         const user = await userModel.findById(id)
         if (user) {
-           
+
             user.name = name ? name : user.name
             user.email = email ? email : user.email
             user.address = address ? address : user.address

@@ -3,6 +3,7 @@ var router = express.Router();
 const productController = require('../../components/product/Controller')
 const categoryController = require('../../components/category/Controller')
 const brandController = require('../../components/brand/Controller')
+const orderController = require('../../components/order/Controller')
 const uploadFile = require('../../middle/UploadFile')
 const CONFIG = require('../../config/Config')
 
@@ -196,5 +197,63 @@ router.post('/:id/edit', uploadFile.array('image', 10), async (req, res, next) =
     }
 });
 
+// http://localhost:3000/cpanel/products
+// hiển thị trang danh sách sản phẩm 
+router.get('/statistic', async function (req, res, next) {
+    try {
+        const stats = await orderController.getStatistics();
+        res.render('product/statistic', {stats})
+    } catch (error) {
+        res.status(500).send('Error fetching statistics');
+    }
+});
+
+// http://localhost:3000/cpanel/products/bill
+// hiển thị trang danh sách sản phẩm 
+router.get('/bill', async function (req, res, next) {
+    try {
+        const orders = await orderController.getAllOrder()
+        res.render('product/bill', {orders})
+    } catch (error) {
+
+    }
+});
+
+// http://localhost:3000/cpanel/products/:id/editBill
+// hiển thị trang cập nhật hóa đơn
+router.get('/:id/editBill', async (req, res, next) => {
+    try {
+        const { id } = req.params
+        const order = await orderController.getOrderById(id)
+        const status = [
+            { value: 'pending', selected: order.status === 'pending' },
+            { value: 'confirmed', selected: order.status === 'confirmed' },
+            { value: 'shipped',selected: order.status === 'shipped' },
+            { value: 'delivered',selected: order.status === 'delivered' }
+        ];
+        res.render('product/editBill', { order, status})
+    } catch (error) {
+        next(error);
+    }
+})
+
+// xử lý trang cập nhật hóa đơn
+router.post('/:id/editBill', async (req, res, next) => {
+    try {
+        let { id } = req.params;
+        let { phoneNumber, shippingAddress, status } = req.body;
+        console.log('>>>> Edit params: ', phoneNumber, shippingAddress, status);
+        
+        const updateSuccess = await orderController.updateOrder(id, phoneNumber, shippingAddress, status);
+        if (updateSuccess) {
+            return res.redirect('/cpanel/products/bill');
+        } else {
+            return res.status(500).send('Update failed');
+        }
+    } catch (error) {
+        console.log('Update order error', error);
+        next(error);
+    }
+});
 
 module.exports = router;

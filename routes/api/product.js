@@ -4,7 +4,6 @@ const productController = require('../../components/product/Controller')
 const cartController = require('../../components/cart/Controller')
 const orderController = require('../../components/order/Controller')
 const voucherContronller = require('../../components/voucher/Controller')
-const momoController = require('../../components/momo/momoController');
 const config = require('../../middle/config')
 // http://localhost:3000/api/products
 // http://localhost:3000/api/products/get-all
@@ -17,6 +16,15 @@ router.get('/get-all', async function (req, res, next) {
     }
 });
 
+// http://localhost:3000/api/products/getallorder
+router.get('/getallorder', async function (req, res, next) {
+    try {
+        const orders = await orderController.getAllOrder()
+        return res.status(200).json({ result: true, orders })
+    } catch (error) {
+        return res.status(500).json({ result: false, orders: null })
+    }
+});
 
 // http://localhost:3000/api/products/get-all/:id/detail
 router.get('/get-all/:id/detail', async function (req, res, next) {
@@ -166,9 +174,9 @@ router.post('/cart/updateTotalPrice', async (req, res) => {
 
 
 router.post('/order', async (req, res) => {
-    const { userId, email, phonenumber, shippingAddress, selectedItems, paymentMethod, totalPrice } = req.body;
+    const { userId, email, phonenumber, shippingAddress, selectedItems, paymentMethod, totalPrice, voucherId } = req.body;
     try {
-        const order = await orderController.createOrder(userId, email, phonenumber, shippingAddress, selectedItems, paymentMethod, totalPrice);
+        const order = await orderController.createOrder(userId, email, phonenumber, shippingAddress, selectedItems, paymentMethod, totalPrice, voucherId);
         return res.status(200).json({ result: true, order });
     } catch (error) {
         return res.status(500).json({ result: false, error: error.message });
@@ -214,6 +222,6 @@ router.get('/getAllVoucher', async function (req, res, next) {
 });
 
 
-router.post('/momo/payment', momoController.createPayment);
+
 
 module.exports = router;
