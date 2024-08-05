@@ -4,6 +4,7 @@ const productController = require('../../components/product/Controller')
 const cartController = require('../../components/cart/Controller')
 const orderController = require('../../components/order/Controller')
 const voucherContronller = require('../../components/voucher/Controller')
+const favoriteController = require('../../components/favorite/Controller')
 const config = require('../../middle/config')
 // http://localhost:3000/api/products
 // http://localhost:3000/api/products/get-all
@@ -218,6 +219,28 @@ router.get('/getAllVoucher', async function (req, res, next) {
         return res.status(200).json({ result: true, vouchers })
     } catch (error) {
         return res.status(500).json({ result: false, vouchers: null })
+    }
+});
+
+// http://localhost:3000/api/products/addFavorite
+router.post('/addFavorite', async function (req, res, next) {
+    try {
+        const {userId, productId} = req.body
+        const favorite = await favoriteController.addFavorite(userId, productId)
+        return res.status(200).json({ result: true, favorite })
+    } catch (error) {
+        return res.status(500).json({ result: false, favorite: null })
+    }
+});
+
+// http://localhost:3000/api/products/favorite/:id
+router.get('/favorite/:userId', async function (req, res, next) {
+    try { 
+        const {userId} = req.params
+        const favorite = await favoriteController.getFavoriteByUserId(userId)
+        return res.status(200).json({ result: true, favorite })
+    } catch (error) {
+        return res.status(500).json({ result: false, favorite: null })
     }
 });
 

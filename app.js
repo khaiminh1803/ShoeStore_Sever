@@ -13,6 +13,8 @@ require('./components/product/Model')
 require('./components/cart/Model')
 require('./components/order/Model')
 require('./components/voucher/Model')
+require('./components/favorite/Model')
+
 var indexRouter = require('./routes/index');
 const userCpanelRouter = require('./routes/cpanel/user')
 const productCpanelRouter = require('./routes/cpanel/product')
