@@ -20,7 +20,7 @@ const orderSchema = new Schema({
     items: [orderDetailSchema],
     totalPrice: { type: Number, default: 0 },
     paymentMethod: { type: String, require: true },
-    status: { type: String, enum: ['pending', 'confirmed', 'shipped', 'delivered'], default: 'pending' },
+    status: { type: String, enum: ['pending', 'confirmed', 'shipped', 'delivered', 'boom'], default: 'pending' },
     voucherId: { type: ObjectId, ref: 'voucher', default: null }, 
     orderDate: { type: Date, default: Date.now }, // Thời gian tạo đơn hàng
 });

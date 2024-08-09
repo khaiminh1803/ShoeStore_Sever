@@ -210,14 +210,33 @@ router.get('/statistic', async function (req, res, next) {
 
 // http://localhost:3000/cpanel/products/bill
 // hiển thị trang danh sách sản phẩm 
+// router.get('/bill', async function (req, res, next) {
+//     try {
+//         const orders = await orderController.getAllOrder()
+//         res.render('product/bill', {orders})
+//     } catch (error) {
+
+//     }
+// });
+
 router.get('/bill', async function (req, res, next) {
     try {
-        const orders = await orderController.getAllOrder()
-        res.render('product/bill', {orders})
+        const status = req.query.status;
+        let orders;
+        if (status && status !== 'all') {
+            orders = await orderController.getOrdersByStatus(status);
+        } else {
+            orders = await orderController.getAllOrder();
+        }
+        res.render('product/bill', { orders, selectedStatus: status });
     } catch (error) {
-
+        console.error('Failed to retrieve orders:', error.message);
+        next(error);
     }
 });
+
+
+
 
 // http://localhost:3000/cpanel/products/:id/editBill
 // hiển thị trang cập nhật hóa đơn
@@ -229,7 +248,8 @@ router.get('/:id/editBill', async (req, res, next) => {
             { value: 'pending', selected: order.status === 'pending' },
             { value: 'confirmed', selected: order.status === 'confirmed' },
             { value: 'shipped',selected: order.status === 'shipped' },
-            { value: 'delivered',selected: order.status === 'delivered' }
+            { value: 'delivered',selected: order.status === 'delivered' },
+            { value: 'boom',selected: order.status === 'boom' },
         ];
         res.render('product/editBill', { order, status})
     } catch (error) {

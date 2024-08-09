@@ -37,6 +37,10 @@ app.set('view engine', 'hbs');
 hbs.registerHelper('json', function(context) {
   return JSON.stringify(context);
 });
+// helper compare
+hbs.registerHelper('eq', function (a, b) {
+  return a === b;
+});
 
 app.use(logger('dev'));
 app.use(express.json());

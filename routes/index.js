@@ -8,6 +8,12 @@ const {authenWeb} = require('../middle/Authen')
 router.get('/',[authenWeb], function (req, res, next) {
   res.render('index');
 });
+router.get('/notification', function (req, res, next) {
+  const message = req.session.errorMessage;
+  // Clear the message after retrieving it
+  req.session.errorMessage = null;
+  res.render('user/notification', {message});
+});
 
 // http://localhost:3000/login
 // hiển thị trang login

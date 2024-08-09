@@ -74,8 +74,16 @@ const authenWeb = (req, res, next) => {
             }
             return next();
         } else {
+            if (url.includes('login')) {
+                return next()
+            }
             // Nếu không phải admin hoặc user có role 0 hoặc 1
-            res.status(403).json({ message: "You are not admin" });
+            // res.status(403).json({ message: "You are not admin" });
+            // return res.redirect('/error', {message: you are not admin});
+            req.session.errorMessage = 'You are not admin';
+            return res.redirect('/notification');
+
+
         }
     });
 };

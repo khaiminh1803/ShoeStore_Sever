@@ -105,4 +105,15 @@ const getStatistics = async () => {
     }
 };    
 
-module.exports = {createOrder,getAllOrder,getAllOrderById, getOrderById, getStatistics, updateOrder}
+const getOrdersByStatus = async (status) => {
+    try {
+        const orders = await orderModel.find({ status }).populate('items.product', 'price image name');
+        return orders;
+    } catch (error) {
+        console.error('Failed to get orders by status:', error.message);
+        throw error;
+    }
+}
+
+
+module.exports = {createOrder,getAllOrder,getAllOrderById, getOrderById, getStatistics, updateOrder, getOrdersByStatus}
